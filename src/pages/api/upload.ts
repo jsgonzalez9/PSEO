@@ -1,8 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import formidable from 'formidable';
-import fs from 'fs';
 
-// Disable Next.js body parsing (formidable will handle it)
+// Disable Next.js built-in body parser (we will manually parse)
 export const config = {
   api: {
     bodyParser: false,
@@ -14,29 +12,32 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ message: 'Method not allowed' });
   }
 
-  const form = new formidable.IncomingForm({ keepExtensions: true });
+  try {
+    const chunks: Buffer[] = [];
 
-  form.parse(req, async (err, fields, files) => {
-    if (err) {
-      console.error('Form parse error:', err);
-      return res.status(500).json({ message: 'Failed to parse the file' });
-    }
+    // Listen to incoming data
+    req.on('data', (chunk) => {
+      chunks.push(chunk);
+    });
 
-    const csvFile = Array.isArray(files.csvFile) ? files.csvFile[0] : files.csvFile;
+    // When all data is received
+    req.on('end', () => {
+      const buffer = Buffer.concat(chunks);
+      const fileContent = buffer.toString('utf-8');
 
-    if (!csvFile) {
-      return res.status(400).json({ message: 'No file uploaded' });
-    }
-
-    try {
-      // Example: Read the file
-      const fileContent = csvFile.file.toString('utf-8');
       console.log('CSV file content:', fileContent);
-      // You can now process the CSV however you want here
+
+      // Here you can now parse CSV, store it, etc.
+
       return res.status(200).json({ message: 'File uploaded and processed successfully!' });
-    } catch (error) {
-      console.error('File processing error:', error);
-      return res.status(500).json({ message: 'Failed to process file' });
-    }
-  });
+    });
+
+    req.on('error', (err) => {
+      console.error('Request stream error:', err);
+      return res.status(500).json({ message: 'Error receiving file' });
+    });
+  } catch (error) {
+    console.error('File processing error:', error);
+    return res.status(500).json({ message: 'Failed to process file' });
+  }
 }
