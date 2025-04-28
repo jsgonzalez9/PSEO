@@ -1,6 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
+import formidable from 'formidable';
+import fs from 'fs';
 
-// Disable Next.js built-in body parser (we will manually parse)
+// Disable Next.js default body parser
 export const config = {
   api: {
     bodyParser: false,
@@ -12,32 +14,28 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ message: 'Method not allowed' });
   }
 
-  try {
-    const chunks: Buffer[] = [];
+  const form = formidable({ multiples: false });
 
-    // Listen to incoming data
-    req.on('data', (chunk) => {
-      chunks.push(chunk);
-    });
+  form.parse(req, async (err, fields, files) => {
+    if (err) {
+      console.error('Form parsing error:', err);
+      return res.status(500).json({ message: 'Error parsing file' });
+    }
 
-    // When all data is received
-    req.on('end', () => {
-      const buffer = Buffer.concat(chunks);
-      const fileContent = buffer.toString('utf-8');
+    const uploadedFile = files.file;
+    const file = Array.isArray(uploadedFile) ? uploadedFile[0] : uploadedFile;
 
-      console.log('CSV file content:', fileContent);
+    if (!file || !file.filepath) {
+      return res.status(400).json({ message: 'No file uploaded' });
+    }
 
-      // Here you can now parse CSV, store it, etc.
-
-      return res.status(200).json({ message: 'File uploaded and processed successfully!' });
-    });
-
-    req.on('error', (err) => {
-      console.error('Request stream error:', err);
-      return res.status(500).json({ message: 'Error receiving file' });
-    });
-  } catch (error) {
-    console.error('File processing error:', error);
-    return res.status(500).json({ message: 'Failed to process file' });
-  }
+    try {
+      const content = await fs.promises.readFile(file.filepath, 'utf-8');
+      console.log('CSV Content:', content); // Just log it for now
+      return res.status(200).json({ message: 'File uploaded and processed!' });
+    } catch (readError) {
+      console.error('Error reading file:', readError);
+      return res.status(500).json({ message: 'Error reading uploaded file' });
+    }
+  });
 }
