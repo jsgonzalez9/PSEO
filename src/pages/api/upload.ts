@@ -22,7 +22,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(500).json({ message: 'Failed to parse the file' });
     }
 
-    const csvFile = files.csvFile?.[0] || files.csvFile;
+    const csvFile = Array.isArray(files.csvFile) ? files.csvFile[0] : files.csvFile;
 
     if (!csvFile) {
       return res.status(400).json({ message: 'No file uploaded' });
@@ -30,9 +30,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     try {
       // Example: Read the file
-      const fileContent = await fs.promises.readFile(csvFile.filepath, 'utf-8');
+      const fileContent = csvFile.file.toString('utf-8');
       console.log('CSV file content:', fileContent);
-
       // You can now process the CSV however you want here
       return res.status(200).json({ message: 'File uploaded and processed successfully!' });
     } catch (error) {
