@@ -1,9 +1,18 @@
+create file vercel.json
+
+# Add the following content:
 {
   "version": 2,
   "builds": [
     {
       "src": "package.json",
       "use": "@vercel/next"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/"
     }
   ],
   "github": {
