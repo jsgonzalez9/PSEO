@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ seo.title_tag }}</title>
+    <meta name="description" content="{{ seo.meta_description }}">
+    <script type="application/ld+json">
+        {{ schema | tojson | safe }}
+    </script>
+</head>
+<body>
+    <h1>{{ room.title }}</h1>
+    <div class="room-description">
+        {{ room.description }}
+    </div>
+    <div class="amenities">
+        <h2>Room Amenities</h2>
+        <ul>
+            {% for amenity in room.amenities %}
+            <li>{{ amenity }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="related-content">
+        <h3>Explore More</h3>
+        <ul>
+            {% for link in links %}
+            <li><a href="{{ link.url }}">{{ link.title }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+</body>
+</html>

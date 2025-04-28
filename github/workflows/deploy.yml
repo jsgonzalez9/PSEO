@@ -1,0 +1,29 @@
+name: Deploy SEO Content
+
+on:
+  push:
+    branches: [ main ]
+  schedule:
+    - cron: '0 0 * * *'  # Daily updates
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+          
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+        
+      - name: Generate content
+        run: python src/app.py generate
+        
+      - name: Deploy to subdomain
+        env:
+          DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+        run: python src/app.py deploy
