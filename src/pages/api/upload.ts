@@ -30,8 +30,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     try {
-      const content = await fs.promises.readFile(file.filepath, 'utf-8');
-      console.log('CSV Content:', content); // Just log it for now
+      const fileBuffer = await fs.promises.readFile(file.filepath);
+      console.log('CSV Content:', fileBuffer.toString('utf-8')); // Just log it for now
       return res.status(200).json({ message: 'File uploaded and processed!' });
     } catch (readError) {
       console.error('Error reading file:', readError);
