@@ -87,9 +87,7 @@ export default function Home() {
                   file:bg-blue-50 file:text-blue-700
                   hover:file:bg-blue-100"
               />
-              {errors.csvFile && (
-                <p className="mt-1 text-sm text-red-600">{errors.csvFile.message}</p>
-              )}
+              {errors.csvFile?.message && (<p className="mt-1 text-sm text-red-600">{String(errors.csvFile.message)}</p>)}
             </div>
 
             <button
