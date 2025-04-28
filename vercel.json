@@ -1,6 +1,3 @@
-create file vercel.json
-
-# Add the following content:
 {
   "version": 2,
   "builds": [
